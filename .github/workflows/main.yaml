@@ -1,0 +1,26 @@
+name: "Minha pipeline"
+
+on:
+    push:
+        branches: [main, developer]
+
+jobs:
+    my-job:
+        runs-on: ubuntu-latest
+
+        steps:
+
+            - name: Checkout
+              uses: actions/checkout@v4
+            
+            - name: Configurar Node.js
+              uses: actions/setup-node@v4
+
+            - name: Instalação de Dependencias
+              run: "npm install"
+              
+            - name: Build
+              run: "npm run build"
+
+            - name: Executar testes
+              run: "npm test"
