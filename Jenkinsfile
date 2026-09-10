@@ -22,6 +22,14 @@ pipeline {
                 sh 'npm test'
             }
         }
+        
+        stage('Deploy') {
+            steps {
+                sshagent("id-credential"){
+                    sh ""
+                }
+            }
+        }
     }
 
     post {
