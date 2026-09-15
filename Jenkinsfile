@@ -25,8 +25,9 @@ pipeline {
         
         stage('Deploy') {
             steps {
-                sshagent("id-credential"){
-                    sh ""
+                echo 'Enviando aplicação para a VM prod...'
+                sshagent(['app']) {
+                    sh 'ssh vagrant@182.0.0.20 hostname'
                 }
             }
         }
