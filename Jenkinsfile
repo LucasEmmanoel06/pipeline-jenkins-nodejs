@@ -27,7 +27,9 @@ pipeline {
             steps {
                 echo 'Enviando aplicação para a VM prod...'
                 sshagent(['app']) {
-                    sh 'ssh vagrant@182.0.0.20 hostname'
+                    sh '''
+                        scp -o StrictHostKeyChecking=no -r ./* vagrant@182.0.0.20:/home/vagrant/
+                    '''
                 }
             }
         }
