@@ -57,6 +57,7 @@ jobs:
                   target: 'http://localhost:3000'
                   cmd_options: '-a'
                   allow_issue_writing: false
+                  artifact_name: zap-scan
 
             - name: Upload relatório ZAP (DAST)
               if: always()
