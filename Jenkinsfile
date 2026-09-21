@@ -22,6 +22,38 @@ pipeline {
                 sh 'npm test'
             }
         }
+
+        stage('SAST - Semgrep') {
+             steps {
+                echo 'Executando analise estatica de codigo (SAST) com Semgrep...'
+                sh '''
+                    docker run --rm -v "$(pwd):/src" returntocorp/semgrep \
+                        semgrep scan --config auto --json --output semgrep-report.json --error
+                '''
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: 'semgrep-report.json', allowEmptyArchive: true
+                }
+            }
+        }
+
+        stage('DAST - OWASP ZAP') {
+            steps {
+                echo 'Executando teste dinamico de seguranca (DAST) com OWASP ZAP...'
+                sh '''
+                    docker run --rm -v "$(pwd):/zap/wrk:rw" zaproxy/zap-stable \
+                        zap-baseline.py -t http://182.0.0.20:3000 -r zap-report.html -I
+                '''
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: 'zap-report.html', allowEmptyArchive: true
+                }
+            }
+        }
+    
+
         
         stage('Deploy') {
             steps {
