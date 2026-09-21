@@ -12,15 +12,54 @@ jobs:
 
             - name: Checkout
               uses: actions/checkout@v4
-            
+
             - name: Configurar Node.js
               uses: actions/setup-node@v4
 
             - name: Instalação de Dependencias
               run: "npm install"
-              
+
             - name: Build
               run: "npm run build"
 
             - name: Executar testes
               run: "npm test"
+
+            # ---------- SAST ----------
+            # Análise estática: lê o código-fonte, sem precisar da aplicação
+            # rodando. Roda o mais cedo possível, logo após Build/Test, para
+            # falhar rápido e barato antes de gastar tempo com o DAST.
+            - name: SAST - Semgrep
+              run: |
+                  pip install semgrep
+                  semgrep scan --config auto --json --output semgrep-report.json --error
+
+            - name: Upload relatório Semgrep (SAST)
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: semgrep-report
+                  path: semgrep-report.json
+                  
+            # ---------- DAST ----------
+            # Análise dinâmica: precisa da aplicação de pé e respondendo a
+            # requisições HTTP, então só pode rodar depois do Build e com o
+            # servidor iniciado. Por isso vem por último na pipeline.
+            - name: Subir aplicação para o scan DAST
+              run: |
+                  npm start &
+                  sleep 5
+
+            - name: DAST - OWASP ZAP Baseline
+              uses: zaproxy/action-baseline@v0.12.0
+              with:
+                  target: 'http://localhost:3000'
+                  cmd_options: '-a'
+                  allow_issue_writing: false
+
+            - name: Upload relatório ZAP (DAST)
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: zap-report
+                  path: report_html.html
