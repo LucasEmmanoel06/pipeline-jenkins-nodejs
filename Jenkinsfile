@@ -22,6 +22,17 @@ pipeline {
                 sh 'npm test'
             }
         }
+        
+        stage('Deploy') {
+            steps {
+                echo 'Enviando aplicação para a VM prod...'
+                sshagent(['app']) {
+                    sh '''
+                        scp -o StrictHostKeyChecking=no -r ./* vagrant@182.0.0.20:/home/vagrant/
+                    '''
+                }
+            }
+        }
     }
 
     post {
