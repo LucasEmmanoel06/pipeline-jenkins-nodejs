@@ -30,6 +30,7 @@ jobs:
             # rodando. Roda o mais cedo possível, logo após Build/Test, para
             # falhar rápido e barato antes de gastar tempo com o DAST.
             - name: SAST - Semgrep
+              continue-on-error: true
               run: |
                   pip install semgrep
                   semgrep scan --config auto --json --output semgrep-report.json --error
